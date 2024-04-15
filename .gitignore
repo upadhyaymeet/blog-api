@@ -1,0 +1,47 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Environment variables file
+.env
+
+# Compiled binary addons
+build/Release
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable file
+.env
+
+# Mac OS X hidden files
+.DS_Store
+
+# Visual Studio Code files
+.vscode/
+
+# Webstorm files
+.idea/
+
+# Sublime Text files
+.sublime-project
+.sublime-workspace
+
+# Node.js generated files
+node_modules
+npm-debug.log
