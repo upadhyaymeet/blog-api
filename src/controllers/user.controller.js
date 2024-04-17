@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from "../models/user.model.js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 const generateAccessAndRefreshToken = async (userId)=>{
     try {
@@ -300,6 +301,38 @@ const updateAavatar = asyncHandler(async(req, res)=>{
     )
 })
 
+const myBlogs = asyncHandler(async(req, res)=>{
+    
+    const blogs = await User.aggregate([
+        {
+            $match:{
+              _id: new mongoose.Types.ObjectId(req.user?._id),
+            }
+        },
+        {
+            $lookup: {
+              from: "blogs",
+              localField: "_id",
+              foreignField: "owner",
+              as:"blogs"
+            }
+          },
+          {
+            $project: {
+              blogs:1
+            }
+          }
+    ])
+
+    if(!blogs){
+        throw new ApiError(500, "something went wrong while fetching your blogs")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, blogs, "fetched all blogs")
+    )
+}) 
+
 export{
     registerUser,
     loginUser,
@@ -308,5 +341,6 @@ export{
     changeCurrentPassword,
     getCurrentUser,
     updateAccountDetails,
-    updateAavatar
+    updateAavatar,
+    myBlogs
 }

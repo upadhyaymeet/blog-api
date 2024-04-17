@@ -3,6 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { Blog } from "../models/blog.model.js"
 import { User } from "../models/user.model.js";
+import {Like} from "../models/likes.model.js"
+import {Comment} from "../models/comment.model.js"
 import mongoose, {isValidObjectId} from "mongoose";
 
 const publishABlog = asyncHandler(async(req, res)=>{
@@ -120,7 +122,7 @@ const getBlogById = asyncHandler(async(req, res)=>{
         req.user?._id,
         {
             $addToSet:{
-                blogs:blogId
+                blogsHistory:blogId
             }
         }
     )
@@ -132,7 +134,89 @@ const getBlogById = asyncHandler(async(req, res)=>{
     )
 })
 
+const updateBlog = asyncHandler(async(req, res)=>{
+  const {blogId} = req.params
+  const {description, title, tags} =  req.body
+
+  if(!isValidObjectId(blogId)){
+    throw new ApiError(400, "Invalid BlogId")
+  }
+
+  const blog = await Blog.findById(blogId)
+  if(!blog){
+    throw new ApiError(404, "blogdoes not found")
+  }
+
+  if(blog?.owner.toString() !== req.user?._id.toString()){
+    throw new ApiError(400, "owner can change the blog")
+  }
+  
+  const updateBlog = await Blog.findByIdAndUpdate(
+      blogId,
+      {
+        $set:{
+          title, 
+          description,
+          tags
+        }
+      },
+      {
+        new:true
+      }
+  )
+
+  if(!updateBlog){
+    throw new ApiError(500, "something went wrong while updating blog")
+  }
+
+  return res.status(200)
+  .json(
+    new ApiResponse(200, updateBlog, "blog update successfully")
+  )
+
+})
+
+const deleteBlog = asyncHandler(async(req, res)=>{
+  const {blogId} = req.params
+
+  if(!isValidObjectId(blogId)){
+    throw new ApiError(400, "invalid blogId")
+  }
+
+  const blog = await Blog.findById(blogId)
+
+  if(!blog){
+    throw new ApiError(404, "blog not found")
+  }
+
+  if(blog?.owner.toString() !== req.user?._id.toString()){
+    throw new ApiError(400, "owner delete the blog")
+  }
+
+  const deleteBlog = await Blog.findByIdAndDelete(blogId)
+  if(!deleteBlog){
+    throw new ApiError(500, "something went wrong while deleting blog")
+  }
+
+  await Like.deleteMany({
+    blog:blogId
+  })
+
+  await Comment.deleteMany({
+    blog:blogId
+  })
+
+  return res.status(201).json(
+    new ApiResponse(201, {}, "blog delete successfully")
+  )
+
+
+})
+
 export {
     publishABlog,
-    getBlogById
+    getBlogById,
+    updateBlog,
+    deleteBlog,
+  
 }

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyJwt } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { getBlogById, publishABlog } from "../controllers/blog.controller.js";
+import { deleteBlog, getBlogById, publishABlog,  updateBlog } from "../controllers/blog.controller.js";
 
 const router = Router()
 router.use(verifyJwt)
@@ -11,5 +11,8 @@ router.route("/")
 
 router.route("/:blogId")
 .get(getBlogById)
+.patch(updateBlog)
+.delete(deleteBlog)
+
 
 export default router

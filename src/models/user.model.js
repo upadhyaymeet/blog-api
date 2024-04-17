@@ -31,6 +31,12 @@ const userSchema = new Schema(
                 ref:"blogs"
             }
         ],
+        blogsHistory:[
+            {
+                type:Schema.Types.ObjectId,
+                ref:"blogs"
+            }
+        ],
         refreshToken:{
             type:String
         }
